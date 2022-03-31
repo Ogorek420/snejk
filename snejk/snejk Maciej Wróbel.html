@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>edwin to pies</title>
+</head>
+<body onkeydown="changeDirection(event)">
+    <div style = "text-align:center">
+    <canvas id="c" width="800" height="600" style="border: 2px solid purple;"></canvas>
+    </div>
+    <div style = "text-align:center">
+    <p id="punkty">Wynik: 0</p> 
+    </div>
+    <script>
+        const canvas = document.getElementById('c'); // dodajemy stałą do kanwasa
+        var ctx = canvas.getContext('2d'); // rysowanko
+        var snake = Array( //stawianie weza
+            {x:450, y:300},
+            {x:440, y:300},
+            {x:430, y:300},
+            {x:420, y:300},
+        );
+        var jedzenie = {x:300, y: 200};   // spawnowanie jedzonka
+        spawnFood();      
+        var kierunek = "prawo"; // jedzie w prawo jak sie zrespi (przez co przy rozjebce o lewą ściane sie buguje ale jestem zbyt leniwy zeby to ogarniac)
+        var punkty = 0;
+        setInterval("gameLoop()", 80); // czas ile zajmuje zeby klatka przeskoczyła
+
+        function changeDirection(e) { // klawisze do ruchania weza
+            switch(e.key) {
+                case "w":
+                kierunek = "gora";
+                break;
+                case "s":
+                kierunek = "dol";
+                break;
+                case "a":
+                kierunek = "lewo";
+                break;
+                case "d":
+                kierunek = "prawo";
+                break;
+            }
+        }
+        function spawnFood() { // kordy jedzonka
+            var x = Math.random();
+            x *= 80; 
+            x = Math.round(x);
+            x = x*10;
+            var y = Math.random();
+            y *= 60;
+            y = Math.round(y);
+            y *= 10;
+
+            jedzenie.x = x;
+            jedzenie.y = y;
+
+        }
+        function gameLoop() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0,0,800,600); // filluje plansze
+
+            // sprawdzam czy ojebałeś japko i dodaje pkt
+            if(snake[0].x == jedzenie.x && snake[0].y == jedzenie.y) {
+                punkty++;
+                document.getElementById('punkty').innerHTML = "Wynik: " + punkty;
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+            
+            var glowax = snake[0].x; 
+            var gloway = snake[0].y;
+
+            switch(kierunek) { // staty ruchania weza
+                case "dol":
+                gloway +=10;
+                break;
+                case "gora":
+                gloway -= 10;
+                break;
+                case "lewo":
+                glowax -= 10;
+                break
+                case "prawo":
+                glowax += 10;
+                break;
+            }
+
+            var nowaGlowa = {x: glowax, y: gloway}; 
+            console.log(nowaGlowa);
+            console.log(snake.length);
+            snake.unshift(nowaGlowa);
+
+            ctx.fillStyle = "green";
+            for(var i = 0 ; i < snake.length ; i++) {
+                ctx.fillRect(snake[i].x, snake[i].y, 10, 10); // porownoje czy wonsz powinien byc dłuższy niz jest i dodaje mu głowe
+            }
+            
+            ctx.fillStyle = "red";
+            ctx.fillRect(jedzenie.x, jedzenie.y,10,10); // dodaje szamke czerwoną
+
+            //sprawdz czy nie uderzyliśmy w koniec planszy
+            if(snake[0].y < 0 || snake[0].y >= 600 || 
+                            snake[0].x < 0 || snake[0].x >= 800) {
+                alert("przegrałeś! twoj wynik to: " + punkty);
+                snake = Array(
+                {x:450, y:300},
+                {x:440, y:300},
+                {x:430, y:300},
+                {x:420, y:300},
+                );
+
+            } //sprawdz czy wonz sie nie zjadł
+            var glowax = snake[0].x;
+            var gloway = snake[0].y; 
+
+              // szukamy weza na identycznych kordach co jest wiec kasacja
+            for(var i = 1 ; i < snake.length ; i++) {
+                if(glowax == snake[i].x && gloway == snake[i].y) {
+                    alert("przegrałeś - wpadłeś sam w siebie, twoj wynik to: " + punkty); 
+                    snake = Array(
+                    {x:450, y:300},
+                    {x:440, y:300},
+                    {x:430, y:300},
+                    {x:420, y:300},
+                    );
+                }
+            }
+                
+        }
+
+    </script>
+</body>
+</html>
